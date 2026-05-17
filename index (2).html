@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GCSE Maths Foundation — Diagnostic Quiz</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+  input::placeholder { color: rgba(255,255,255,0.5); }
+  input { color: white; }
+  button { font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const TEACHER_EMAIL = "Nbaythoon@gmail.com";
+const GREEN = "#16a34a";
+const AMBER = "#d97706";
+const RED   = "#dc2626";
+const STORAGE_KEY_ANSWERS = "maths_diag_answers";
+const STORAGE_KEY_NAME    = "maths_diag_name";
+const LABELS = ["A","B","C","D"];
+
+const topics = [
+  {
+    id:1, title:"Number: Four Rules, BIDMAS & Negatives",
+    questions:[
+      {level:"green",text:"Calculate 3 + 4 × 2",options:["14","11","10","7"],correct:1},
+      {level:"green",text:"Calculate −6 + 4",options:["−10","10","2","−2"],correct:3},
+      {level:"green",text:"Calculate −3 × −5",options:["−15","−8","15","8"],correct:2},
+      {level:"amber",text:"Calculate (2 + 3)² − 4 × 3",options:["1","13","25","−1"],correct:1},
+      {level:"amber",text:"Calculate −4 × 3 + (−2)²",options:["−8","8","−16","4"],correct:0},
+      {level:"amber",text:"Calculate 18 ÷ (3 + 3) × 2",options:["1","12","6","3"],correct:2},
+      {level:"red",text:"Calculate (−3 + 5)² ÷ 4 − 3 × (−2)",options:["7","−5","1","11"],correct:0},
+      {level:"red",text:"Which set of brackets makes 3 + 4 × 2 − 1 = 13?",options:["(3 + 4) × 2 − 1","3 + 4 × (2 − 1)","3 + (4 × 2) − 1","(3 + 4) × (2 − 1)"],correct:0},
+    ]
+  },
+  {
+    id:2, title:"Rounding & Estimation",
+    questions:[
+      {level:"green",text:"Round 4.763 to 1 decimal place",options:["4.7","4.8","4.76","5.0"],correct:1},
+      {level:"green",text:"Round 2847 to the nearest 100",options:["2900","2800","2850","3000"],correct:1},
+      {level:"amber",text:"Estimate 48.6 × 3.2 ÷ 9.7",options:["5","10","15","20"],correct:2},
+      {level:"amber",text:"Write 0.004563 to 2 significant figures",options:["0.005","0.0046","0.00456","0.0045"],correct:1},
+      {level:"red",text:"A rectangle is 6.8 cm × 3.5 cm (both to 1 d.p.). What is the upper bound of the area?",options:["24.3175 cm²","23.80 cm²","25.00 cm²","24.08 cm²"],correct:0},
+      {level:"red",text:"Estimate √98.4 × 5.1²",options:["50","100","250","500"],correct:2},
+    ]
+  },
+  {
+    id:3, title:"Prime Numbers, HCF & LCM",
+    questions:[
+      {level:"green",text:"Which list shows ALL prime numbers between 1 and 20?",options:["2,3,5,7,11,13,17,19","1,2,3,5,7,11,13,17,19","2,3,5,7,9,11,13,17,19","2,3,5,7,11,13,17,18,19"],correct:0},
+      {level:"green",text:"Write 36 as a product of its prime factors",options:["2 × 18","2³ × 3","2² × 3²","6²"],correct:2},
+      {level:"amber",text:"Find the HCF of 48 and 60",options:["6","12","24","240"],correct:1},
+      {level:"amber",text:"Find the LCM of 12 and 18",options:["6","36","72","216"],correct:1},
+      {level:"red",text:"Bus A comes every 24 min, Bus B every 40 min. They leave together now. When do they next leave together?",options:["1 hour","2 hours","40 minutes","3 hours"],correct:1},
+    ]
+  },
+  {
+    id:4, title:"Algebra: Simplifying & Collecting Like Terms",
+    questions:[
+      {level:"green",text:"Simplify: 3x + 5y − x + 2y",options:["2x + 7y","4x + 7y","2x + 3y","4x + 3y"],correct:0},
+      {level:"green",text:"Simplify: 4a × 3b",options:["7ab","12ab","12a + b","12"],correct:1},
+      {level:"amber",text:"Simplify: 2x² + 3x − x² − 7x + 4",options:["x² + 4x + 4","x² − 4x + 4","3x² − 4x + 4","x² − 10x + 4"],correct:1},
+      {level:"amber",text:"Simplify: 12x²y ÷ 4xy",options:["3x","3xy","3x²","48x³y²"],correct:0},
+      {level:"red",text:"Expand and simplify: 3(2x − 4) − 2(x + 5)",options:["4x − 2","4x + 2","4x − 22","8x − 22"],correct:2},
+      {level:"red",text:"Expand and simplify: 2(3x − 1)² − (x + 2)(x − 2)",options:["17x² − 12x + 6","17x² + 12x + 6","17x² − 12x − 2","16x² − 12x + 6"],correct:0},
+    ]
+  },
+  {
+    id:5, title:"Expanding Brackets",
+    questions:[
+      {level:"green",text:"Expand: 5(3x + 2)",options:["8x + 2","15x + 2","15x + 10","15x + 7"],correct:2},
+      {level:"green",text:"Expand and simplify: 3(x + 4) + 2(x − 1)",options:["5x + 10","5x + 14","6x + 10","5x + 2"],correct:0},
+      {level:"amber",text:"Expand and simplify: (x + 5)(x + 2)",options:["x² + 10","x² + 7x + 10","x² + 3x + 10","2x² + 7x + 10"],correct:1},
+      {level:"amber",text:"Expand and simplify: (x − 3)(x + 3)",options:["x² + 9","x² − 6x − 9","x² − 9","x² − 6x + 9"],correct:2},
+      {level:"red",text:"Expand and simplify: (2x + 1)(3x − 4)",options:["6x² − 5x − 4","6x² + 5x − 4","5x² − 5x − 4","6x² − 5x + 4"],correct:0},
+      {level:"red",text:"What is (x + 3)² expanded correctly?",options:["x² + 9","x² + 3x + 9","x² + 6x + 9","2x + 6"],correct:2},
+    ]
+  },
+  {
+    id:6, title:"Factorising",
+    questions:[
+      {level:"green",text:"Factorise: 6x + 15",options:["3(2x + 5)","6(x + 15)","3(2x + 15)","2(3x + 5)"],correct:0},
+      {level:"green",text:"Factorise: 10a² − 4a",options:["2(5a² − 2a)","a(10a − 4)","2a(5a − 2)","4a(2.5a − 1)"],correct:2},
+      {level:"amber",text:"Factorise: x² + 8x + 15",options:["(x + 3)(x + 5)","(x + 4)(x + 4)","(x + 1)(x + 15)","(x + 6)(x + 2)"],correct:0},
+      {level:"amber",text:"Factorise: x² − 5x + 6",options:["(x − 1)(x − 6)","(x − 2)(x − 3)","(x + 2)(x + 3)","(x − 6)(x + 1)"],correct:1},
+      {level:"red",text:"Factorise: x² − 25",options:["(x − 5)²","(x + 5)²","(x + 5)(x − 5)","(x + 25)(x − 1)"],correct:2},
+      {level:"red",text:"Solve by factorising: x² + 3x − 10 = 0",options:["x = 5 or x = −2","x = −5 or x = 2","x = 5 or x = 2","x = −10 or x = 3"],correct:1},
+    ]
+  },
+  {
+    id:7, title:"Formulae: Substitution & Rearranging",
+    questions:[
+      {level:"green",text:"Use v = u + at to find v when u = 5, a = 3, t = 4",options:["12","17","60","32"],correct:1},
+      {level:"green",text:"Find 3a² − b when a = 2 and b = −3",options:["9","12","15","−9"],correct:2},
+      {level:"amber",text:"Make x the subject of: y = 3x − 7",options:["x = y − 7 ÷ 3","x = (y + 7) ÷ 3","x = 3y + 7","x = (y − 7) ÷ 3"],correct:1},
+      {level:"amber",text:"Make t the subject of: v = u + at",options:["t = v − u ÷ a","t = (v − u) × a","t = (v − u) ÷ a","t = a(v − u)"],correct:2},
+      {level:"red",text:"Make r the subject of: A = πr²",options:["r = A ÷ π","r = √(A ÷ π)","r = √(Aπ)","r = A² ÷ π"],correct:1},
+      {level:"red",text:"Make b the subject of: A = ½(a + b)h",options:["b = 2A − ah","b = A ÷ h − a","b = 2A ÷ h − a","b = 2Ah − a"],correct:2},
+    ]
+  },
+  {
+    id:8, title:"Algebraic Reasoning & Proofs",
+    questions:[
+      {level:"green",text:"(x + 1)² − x² simplifies to:",options:["2x","2x + 1","2x + 2","x² + 1"],correct:1},
+      {level:"amber",text:"Which expression always gives an even number?",options:["n + 1","2n","2n + 1","n²"],correct:1},
+      {level:"amber",text:"n + (n + 1) simplifies to 2n + 1. What does this prove about consecutive integers?",options:["Their sum is always odd","Their sum is always even","Their product is odd","They are always prime"],correct:0},
+      {level:"red",text:"The product of two consecutive even numbers is always divisible by:",options:["2","4","6","8"],correct:3},
+    ]
+  },
+  {
+    id:9, title:"Bounds & Error Intervals",
+    questions:[
+      {level:"green",text:"A length is measured as 15 cm to the nearest cm. What is the error interval?",options:["14 ≤ l ≤ 16","14.5 ≤ l < 15.5","14.5 < l ≤ 15.5","15 ≤ l < 15.5"],correct:1},
+      {level:"green",text:"A mass is 3.7 kg to 1 d.p. What is the error interval?",options:["3.6 ≤ m < 3.8","3.65 ≤ m < 3.75","3.7 ≤ m < 3.8","3.65 < m ≤ 3.75"],correct:1},
+      {level:"amber",text:"p = 8.4 and q = 2.6 (both to 1 d.p.). What is the upper bound of p + q?",options:["11.0","11.1","10.9","11.2"],correct:1},
+      {level:"red",text:"Rectangle: l = 12 cm, w = 7 cm (nearest cm). What is the upper bound of the perimeter?",options:["38 cm","40 cm","42 cm","39 cm"],correct:1},
+      {level:"red",text:"d = 150 km (nearest 10 km), t = 2.5 h (nearest 0.5 h). What is the upper bound of speed?",options:["60.0 km/h","62.5 km/h","68.9 km/h","75.0 km/h"],correct:2},
+    ]
+  },
+  {
+    id:10, title:"Area & Perimeter",
+    questions:[
+      {level:"green",text:"Find the area of a triangle with base 10 cm and height 6 cm",options:["60 cm²","30 cm²","16 cm²","24 cm²"],correct:1},
+      {level:"green",text:"Find the perimeter of a rectangle with length 9 cm and width 5 cm",options:["45 cm","28 cm","14 cm","22 cm"],correct:1},
+      {level:"amber",text:"An L-shape is a 6×4 rectangle with a 2×2 square removed from one corner. Find the area.",options:["24 cm²","20 cm²","22 cm²","16 cm²"],correct:1},
+      {level:"amber",text:"Find the area of a trapezium with parallel sides 5 cm and 9 cm, and height 4 cm",options:["56 cm²","28 cm²","70 cm²","14 cm²"],correct:1},
+      {level:"red",text:"A 10×6 cm rectangle has a semicircle of diameter 6 cm on one end. Total area in terms of π?",options:["(60 + 9π) cm²","(60 + 3π) cm²","(60 + 4.5π) cm²","(60 + 6π) cm²"],correct:2},
+    ]
+  },
+  {
+    id:11, title:"Circles: Area, Circumference & Sectors",
+    questions:[
+      {level:"green",text:"Find the circumference of a circle with radius 7 cm (in terms of π)",options:["7π cm","14π cm","49π cm","28π cm"],correct:1},
+      {level:"green",text:"Find the area of a circle with diameter 10 cm (in terms of π)",options:["10π cm²","20π cm²","25π cm²","100π cm²"],correct:2},
+      {level:"amber",text:"Find the circumference of a circle with radius 4.5 cm (to 1 d.p.)",options:["14.1 cm","28.3 cm","63.6 cm","9.0 cm"],correct:1},
+      {level:"amber",text:"Find the arc length of a sector with radius 8 cm and angle 90° (in terms of π)",options:["2π cm","4π cm","8π cm","16π cm"],correct:1},
+      {level:"red",text:"Find the area of a sector with radius 12 cm and angle 150° (in terms of π)",options:["30π cm²","60π cm²","90π cm²","24π cm²"],correct:1},
+      {level:"red",text:"A circle has circumference 40π cm. Find its area (in terms of π).",options:["20π cm²","400π cm²","40π cm²","1600π cm²"],correct:1},
+    ]
+  },
+  {
+    id:12, title:"Volume of Prisms & Surface Area",
+    questions:[
+      {level:"green",text:"Find the volume of a cuboid 5 cm × 4 cm × 3 cm",options:["12 cm³","47 cm³","60 cm³","94 cm³"],correct:2},
+      {level:"green",text:"Find the surface area of a cuboid: length 3 cm, width 2 cm, height 4 cm",options:["24 cm²","48 cm²","52 cm²","64 cm²"],correct:2},
+      {level:"amber",text:"A triangular prism has a right-angled cross-section with legs 6 cm and 8 cm. Length = 10 cm. Find the volume.",options:["120 cm³","240 cm³","480 cm³","60 cm³"],correct:1},
+      {level:"red",text:"Total surface area of a triangular prism: cross-section has legs 3, 4 and hypotenuse 5. Length = 8 cm.",options:["96 cm²","108 cm²","120 cm²","72 cm²"],correct:1},
+    ]
+  },
+  {
+    id:13, title:"Pyramids, Cones & Spheres",
+    questions:[
+      {level:"green",text:"Volume of a sphere with radius 3 cm. (V = 4/3 πr³) Give in terms of π.",options:["9π cm³","12π cm³","27π cm³","36π cm³"],correct:3},
+      {level:"amber",text:"Cone: radius 5 cm, height 12 cm. (V = 1/3 πr²h) Find the volume to 1 d.p.",options:["942.5 cm³","314.2 cm³","471.2 cm³","157.1 cm³"],correct:1},
+      {level:"amber",text:"Surface area of a cone: radius 4 cm, slant height 7 cm. (SA = πr² + πrl) In terms of π.",options:["28π cm²","44π cm²","56π cm²","16π cm²"],correct:1},
+      {level:"red",text:"A cone has volume 75π cm³ and radius 5 cm. (V = 1/3 πr²h) Find the perpendicular height.",options:["5 cm","9 cm","15 cm","3 cm"],correct:1},
+      {level:"red",text:"A sphere has surface area 100π cm². (SA = 4πr²) Find the radius.",options:["5 cm","10 cm","25 cm","50 cm"],correct:0},
+    ]
+  },
+  {
+    id:14, title:"Pythagoras' Theorem",
+    questions:[
+      {level:"green",text:"Find the hypotenuse of a right-angled triangle with legs 6 cm and 8 cm",options:["8.5 cm","10 cm","14 cm","100 cm"],correct:1},
+      {level:"green",text:"A right-angled triangle has hypotenuse 15 cm and one leg 9 cm. Find the missing leg.",options:["6 cm","12 cm","√306 cm","18 cm"],correct:1},
+      {level:"amber",text:"Is a triangle with sides 7 cm, 24 cm and 25 cm right-angled?",options:["Yes, because 7² + 24² = 25²","No, because 7 + 24 ≠ 25","Yes, because 7 + 24 > 25","No, only 3-4-5 triangles are right-angled"],correct:0},
+      {level:"amber",text:"A square has diagonal 10 cm. Find the side length to 2 d.p.",options:["5.00 cm","7.07 cm","8.00 cm","50.00 cm"],correct:1},
+      {level:"red",text:"An 8 m ladder has its foot at 2 m from a wall. The foot slides to 3.5 m. How far does the top slide down?",options:["0.55 m","1.50 m","0.25 m","1.00 m"],correct:0},
+      {level:"red",text:"Find the space diagonal of a cuboid measuring 3 cm × 4 cm × 12 cm.",options:["12 cm","13 cm","√153 cm","19 cm"],correct:1},
+    ]
+  },
+  {
+    id:15, title:"Trigonometry (SOHCAHTOA)",
+    questions:[
+      {level:"green",text:"In a right-angled triangle, hypotenuse = 10 cm, angle = 30°. Find the opposite side.",options:["8.66 cm","5.00 cm","11.55 cm","3.00 cm"],correct:1},
+      {level:"green",text:"In a right-angled triangle, adjacent = 6 cm, angle = 40°. Find the hypotenuse.",options:["4.60 cm","7.83 cm","9.33 cm","6.43 cm"],correct:1},
+      {level:"amber",text:"Find angle θ where the opposite side = 7 cm and hypotenuse = 12 cm",options:["54.3°","35.7°","30.0°","60.0°"],correct:1},
+      {level:"amber",text:"A ramp rises 1.5 m over a horizontal distance of 4 m. Find the angle with the horizontal.",options:["20.6°","69.4°","30.0°","13.5°"],correct:0},
+      {level:"red",text:"A vertical pole casts an 8 m shadow when the sun's angle of elevation is 35°. Find the height of the pole.",options:["5.60 m","6.55 m","11.43 m","4.59 m"],correct:0},
+      {level:"red",text:"From the top of a 20 m cliff, angle of depression to a boat is 25°. Find the horizontal distance to the boat.",options:["9.33 m","22.5 m","42.9 m","47.6 m"],correct:2},
+    ]
+  },
+  {
+    id:16, title:"Constructions & Loci",
+    questions:[
+      {level:"green",text:"How do you construct the perpendicular bisector of line segment AB?",options:["Draw arcs from A and B with equal radius, join where arcs cross","Draw a line from A to the midpoint of AB","Measure AB and mark the centre only","Draw semicircles touching at one point"],correct:0},
+      {level:"green",text:"What is the locus of all points exactly 5 cm from a fixed point P?",options:["A straight line","A circle of radius 5 cm centred at P","A square with side 5 cm","An arc of radius 5 cm"],correct:1},
+      {level:"amber",text:"How do you bisect angle ABC using a compass and ruler?",options:["Measure the angle and divide by 2","Draw arc from B cutting both arms, draw equal arcs from those points, join B to where they cross","Draw a line from B to the midpoint of AC","Use a ruler to estimate half the angle"],correct:1},
+      {level:"amber",text:"What is the locus of points equidistant from two fixed points A and B?",options:["A circle centred at A","A line parallel to AB","The perpendicular bisector of AB","The midpoint of AB only"],correct:2},
+      {level:"red",text:"A dog is tied to a corner of a 4 m × 3 m shed on a 5 m lead. Which describes the region the dog can reach?",options:["A full circle of radius 5 m","A ¾ circle of radius 5 m, plus two smaller quarter circles around the other rear corners","A semicircle of radius 5 m","A ¾ circle of radius 5 m only"],correct:1},
+    ]
+  },
+  {
+    id:17, title:"Angle Geometry",
+    questions:[
+      {level:"green",text:"Angles at a point are 120°, 95°, and x°. Find x.",options:["135°","145°","155°","125°"],correct:1},
+      {level:"green",text:"Two angles on a straight line are 3x° and 42°. Find x.",options:["34","40","46","74"],correct:2},
+      {level:"amber",text:"Two parallel lines are cut by a transversal. One co-interior angle is 112°. Find the other.",options:["112°","68°","58°","78°"],correct:1},
+      {level:"amber",text:"Find the sum of interior angles of a hexagon.",options:["540°","720°","900°","1080°"],correct:1},
+      {level:"amber",text:"Find the interior angle of a regular octagon.",options:["120°","135°","144°","150°"],correct:1},
+      {level:"red",text:"A triangle has angles x°, (x + 20)° and (2x − 10)°. Find x.",options:["x = 40","x = 42.5","x = 45","x = 50"],correct:1},
+      {level:"red",text:"Which statement correctly describes the exterior angle of a triangle?",options:["It equals 180° minus the sum of all interior angles","It equals the sum of the two non-adjacent interior angles","It equals 360° divided by number of sides","It is always 90°"],correct:1},
+    ]
+  },
+  {
+    id:18, title:"Ratio & Proportion",
+    questions:[
+      {level:"green",text:"Share £150 in the ratio 2 : 3",options:["£50 and £100","£75 and £75","£60 and £90","£30 and £120"],correct:2},
+      {level:"green",text:"Simplify the ratio 24 : 36",options:["4 : 6","2 : 3","6 : 9","12 : 18"],correct:1},
+      {level:"amber",text:"A recipe uses flour and butter in ratio 5 : 2. How much butter is needed with 350 g of flour?",options:["100 g","140 g","175 g","70 g"],correct:1},
+      {level:"amber",text:"y is directly proportional to x. When x = 4, y = 20. Find y when x = 7.",options:["28","35","42","14"],correct:1},
+      {level:"red",text:"y is inversely proportional to x. When x = 3, y = 8. Find x when y = 6.",options:["4","5","6","16"],correct:0},
+      {level:"red",text:"A map has scale 1 : 25 000. Two towns are 8.4 cm apart on the map. What is the real distance in km?",options:["0.84 km","2.1 km","21 km","210 km"],correct:1},
+    ]
+  },
+  {
+    id:19, title:"Fractions, Decimals & Percentages",
+    questions:[
+      {level:"green",text:"Convert 3/5 to a percentage",options:["35%","53%","60%","75%"],correct:2},
+      {level:"green",text:"Write 0.35 as a fraction in its simplest form",options:["1/3","7/20","7/2","35/10"],correct:1},
+      {level:"green",text:"What is 30% of £240?",options:["£48","£72","£60","£80"],correct:1},
+      {level:"green",text:"Convert 65% to a decimal",options:["6.5","0.065","0.65","65"],correct:2},
+      {level:"amber",text:"Which is the correct ascending order of 0.62, 3/5, 58%, 7/12?",options:["58%, 7/12, 3/5, 0.62","3/5, 58%, 7/12, 0.62","7/12, 58%, 0.62, 3/5","0.62, 3/5, 7/12, 58%"],correct:0},
+      {level:"amber",text:"A jacket costs £85 and is reduced by 20%. Find the sale price.",options:["£65","£68","£70","£17"],correct:1},
+      {level:"amber",text:"Express 48 as a percentage of 60.",options:["75%","80%","125%","48%"],correct:1},
+      {level:"red",text:"After a 25% increase, a phone costs £375. What was the original price?",options:["£275","£281.25","£300","£312.50"],correct:2},
+      {level:"red",text:"£2000 is invested at 3% compound interest per year. How much after 4 years?",options:["£2240.00","£2251.02","£2262.48","£2060.00"],correct:1},
+    ]
+  },
+  {
+    id:20, title:"Graphs: Drawing & Interpreting",
+    questions:[
+      {level:"green",text:"What is the gradient and y-intercept of y = 3x − 4?",options:["Gradient 3, y-intercept −4","Gradient −4, y-intercept 3","Gradient 3, y-intercept 4","Gradient −3, y-intercept 4"],correct:0},
+      {level:"green",text:"Where does y = 2x + 1 cross the y-axis?",options:["(1, 0)","(0, 2)","(0, 1)","(2, 1)"],correct:2},
+      {level:"amber",text:"Find the equation of the line through (0, 3) and (4, 11).",options:["y = 2x + 3","y = 3x + 2","y = 2x − 3","y = 8x + 3"],correct:0},
+      {level:"amber",text:"The graph of y = x² − 2x − 3 crosses the x-axis. What are the solutions?",options:["x = −3 and x = 1","x = −1 and x = 3","x = 1 and x = 3","x = −3 and x = −1"],correct:1},
+      {level:"red",text:"Find the gradient of the line joining (−1, 5) and (3, −3).",options:["2","−2","−½","½"],correct:1},
+      {level:"red",text:"To solve x² − x − 4 = 0 graphically using y = x² − x − 2, which line do you draw?",options:["y = 0","y = 2","y = −2","y = 4"],correct:1},
+    ]
+  },
+  {
+    id:21, title:"Simultaneous Equations",
+    questions:[
+      {level:"green",text:"Solve: x + y = 8 and x − y = 2",options:["x = 3, y = 5","x = 5, y = 3","x = 4, y = 4","x = 6, y = 2"],correct:1},
+      {level:"amber",text:"Solve: 2x + y = 9 and x + 3y = 12",options:["x = 3, y = 3","x = 4, y = 1","x = 2, y = 5","x = 6, y = −3"],correct:0},
+      {level:"amber",text:"Two numbers have a sum of 20 and a difference of 6. What are they?",options:["13 and 7","14 and 6","11 and 9","15 and 5"],correct:0},
+      {level:"red",text:"Solve: 3x + 2y = 16 and 5x − y = 9",options:["x = 2, y = 5","x = 3, y = 3.5","x = 34/13, y = 53/13","x = 1, y = 6.5"],correct:2},
+      {level:"red",text:"Find the intersection of y = x + 1 and y = −x + 5.",options:["(1, 4)","(2, 3)","(3, 2)","(0, 5)"],correct:1},
+    ]
+  },
+  {
+    id:22, title:"Fractions: Calculations",
+    questions:[
+      {level:"green",text:"Calculate: 2/3 + 1/4",options:["3/7","11/12","3/12","8/7"],correct:1},
+      {level:"green",text:"Calculate: 3/4 × 8/9",options:["27/32","2/3","3/4","11/13"],correct:1},
+      {level:"amber",text:"Calculate: 2½ + 1¾",options:["3¼","4¼","4½","3¾"],correct:1},
+      {level:"amber",text:"Calculate: 2⅓ × 1½",options:["3","3½","4","2⅓"],correct:1},
+      {level:"red",text:"Calculate: (3/4 − 1/3) ÷ 5/6",options:["5/18","1/2","25/72","5/8"],correct:1},
+      {level:"red",text:"Find ¾ of £3.60. Express your answer as a fraction of £4.50.",options:["1/2","3/5","2/3","3/4"],correct:1},
+    ]
+  },
+  {
+    id:23, title:"Statistics: Averages & Spread",
+    questions:[
+      {level:"green",text:"Find the mean of: 4, 7, 3, 9, 4, 6, 2, 4",options:["4","4.5","4.875","5"],correct:2},
+      {level:"green",text:"What is the mode of: 4, 7, 3, 9, 4, 6, 2, 4?",options:["3","4","4.875","7"],correct:1},
+      {level:"amber",text:"Grouped data: 0–10 (f=3), 10–20 (f=7), 20–30 (f=5), 30–40 (f=5). Estimate the mean.",options:["18","20","21","25"],correct:2},
+      {level:"amber",text:"15 scores in order: 45,50,55,55,55,60,60,62,68,70,72,75,80,88,90. What is the median?",options:["60","62","68","55"],correct:1},
+      {level:"red",text:"The mean of 5 numbers is 14. A 6th number is added and the new mean is 15. What is the 6th number?",options:["15","16","20","25"],correct:2},
+    ]
+  },
+  {
+    id:24, title:"Charts: Bar, Pie & Line Graphs",
+    questions:[
+      {level:"green",text:"30 students chose a subject. Science was chosen by 12. What is Science's angle in a pie chart?",options:["96°","120°","144°","160°"],correct:2},
+      {level:"green",text:"Which feature would make a bar chart misleading?",options:["Bars all the same colour","The y-axis does not start at zero","The chart has a title","The bars are the same width"],correct:1},
+      {level:"amber",text:"A pie chart has an 80° sector. 240 people were surveyed. How many does that sector represent?",options:["40","53","80","96"],correct:1},
+      {level:"red",text:"120 people were surveyed. Football was chosen by 45. What is Football's pie chart angle?",options:["90°","120°","135°","150°"],correct:2},
+    ]
+  },
+  {
+    id:25, title:"Indices & Standard Form",
+    questions:[
+      {level:"green",text:"Calculate: 3² × 3⁴",options:["9⁶","729","243","3⁸"],correct:1},
+      {level:"green",text:"Write 4500 in standard form",options:["45 × 10²","4.5 × 10³","0.45 × 10⁴","4.5 × 10⁴"],correct:1},
+      {level:"green",text:"Write 0.00072 in standard form",options:["7.2 × 10⁻³","7.2 × 10⁻⁴","0.72 × 10⁻³","72 × 10⁻⁵"],correct:1},
+      {level:"amber",text:"Simplify: x⁵ ÷ x²",options:["x³","x⁷","x²·⁵","1"],correct:0},
+      {level:"amber",text:"Simplify: (2x³)⁴",options:["8x⁷","16x⁷","16x¹²","2x¹²"],correct:2},
+      {level:"amber",text:"Calculate (4.5 × 10⁵) + (3.2 × 10⁴). Give in standard form.",options:["7.7 × 10⁵","4.82 × 10⁵","7.7 × 10⁴","4.82 × 10⁹"],correct:1},
+      {level:"red",text:"Calculate (3.2 × 10⁵) × (2.5 × 10³). Give in standard form.",options:["5.7 × 10⁸","8 × 10⁸","8 × 10¹⁵","0.8 × 10⁹"],correct:1},
+      {level:"red",text:"Simplify: (3x²y³)² ÷ (9x⁴y)",options:["y⁵","y⁶","x²y⁵","3y⁵"],correct:0},
+    ]
+  },
+  {
+    id:26, title:"Scatter Graphs & Correlation",
+    questions:[
+      {level:"green",text:"What does 'positive correlation' mean?",options:["As one variable increases, the other decreases","As one variable increases, the other also tends to increase","There is no relationship between the variables","The variables are always equal"],correct:1},
+      {level:"green",text:"As hours of TV watched increases, exam scores decrease. What type of correlation?",options:["Positive","Negative","No correlation","Perfect positive"],correct:1},
+      {level:"amber",text:"A line of best fit passes through (2, 45) and (8, 75). Estimate the score for 5 hours revision.",options:["50","55","60","65"],correct:2},
+      {level:"red",text:"A graph shows bigger feet → taller height. A student says 'bigger feet causes greater height.' What is wrong?",options:["The data may have been collected incorrectly","Correlation does not imply causation — both may be caused by a third factor such as age","Shoe size and height are not correlated","The sample size is too small"],correct:1},
+      {level:"red",text:"Why is it unreliable to use a line of best fit to predict height for shoe size 20?",options:["The line of best fit is not accurate enough","Shoe size 20 is outside the data range — this is extrapolation","You need more data points first","The correlation is not strong enough"],correct:1},
+    ]
+  },
+];
+
+const levelConfig = {
+  green:{label:"Green",color:GREEN,bg:"#f0fdf4",border:"#bbf7d0",emoji:"🟢"},
+  amber:{label:"Amber",color:AMBER,bg:"#fffbeb",border:"#fde68a",emoji:"🟡"},
+  red:  {label:"Red",  color:RED,  bg:"#fff1f2",border:"#fecdd3",emoji:"🔴"},
+};
+
+function loadLS(key,fb){try{const r=localStorage.getItem(key);return r?JSON.parse(r):fb;}catch{return fb;}}
+function saveLS(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch{}}
+
+const {useState,useEffect} = React;
+
+function QuestionCard({question,qIndex,topicId,answer,onAnswer}){
+  const cfg=levelConfig[question.level];
+  const answered=answer!==undefined;
+  const correct=answer===question.correct;
+  return(
+    <div style={{borderLeft:`4px solid ${answered?(correct?GREEN:RED):cfg.color}`,background:answered?(correct?"#f0fdf4":"#fff1f2"):"#fff",border:`1px solid ${answered?(correct?"#86efac":"#fca5a5"):cfg.border}`,borderRadius:8,padding:"12px 14px",marginBottom:10,transition:"all 0.2s"}}>
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+        <span style={{fontSize:11,fontWeight:700,color:cfg.color,textTransform:"uppercase",letterSpacing:"0.05em"}}>{cfg.emoji} {cfg.label}</span>
+        {answered&&<span style={{fontSize:13,fontWeight:700,color:correct?GREEN:RED,marginLeft:"auto"}}>{correct?"✅ Correct!":"❌ Incorrect"}</span>}
+      </div>
+      <p style={{margin:"0 0 10px",fontSize:14,color:"#1e293b",lineHeight:1.5,fontWeight:500}}>{qIndex+1}. {question.text}</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+        {question.options.map((opt,i)=>{
+          let bg="#f8fafc",border="#e2e8f0",color="#334155",fw=500;
+          if(answered){
+            if(i===question.correct){bg="#dcfce7";border=GREEN;color="#166534";fw=700;}
+            else if(i===answer&&!correct){bg="#fee2e2";border=RED;color="#991b1b";fw=700;}
+            else{bg="#f8fafc";color="#94a3b8";}
+          }
+          return(
+            <button key={i} onClick={()=>!answered&&onAnswer(topicId,qIndex,i)}
+              style={{padding:"8px 10px",borderRadius:7,border:`2px solid ${border}`,background:bg,color,fontSize:13,cursor:answered?"default":"pointer",textAlign:"left",fontWeight:fw,display:"flex",alignItems:"center",gap:8,lineHeight:1.3,fontFamily:"inherit"}}>
+              <span style={{minWidth:22,height:22,borderRadius:"50%",background:answered&&i===question.correct?GREEN:answered&&i===answer&&!correct?RED:"#e2e8f0",color:answered&&(i===question.correct||(i===answer&&!correct))?"#fff":"#64748b",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,flexShrink:0}}>
+                {LABELS[i]}
+              </span>
+              {opt}
+            </button>
+          );
+        })}
+      </div>
+      {answered&&!correct&&(
+        <div style={{marginTop:8,padding:"6px 10px",background:"#f0fdf4",borderRadius:6,border:"1px solid #86efac"}}>
+          <span style={{fontSize:12,color:GREEN,fontWeight:700}}>✅ Correct answer: </span>
+          <span style={{fontSize:12,color:"#166534"}}>{LABELS[question.correct]}. {question.options[question.correct]}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TopicSection({topic,answers,onAnswer}){
+  const [open,setOpen]=useState(false);
+  const total=topic.questions.length;
+  const attempted=topic.questions.filter((_,i)=>answers[`${topic.id}-${i}`]!==undefined).length;
+  const correct=topic.questions.filter((q,i)=>answers[`${topic.id}-${i}`]===q.correct).length;
+  const pct=attempted>0?Math.round((correct/total)*100):0;
+  return(
+    <div style={{background:"#fff",borderRadius:12,border:"1px solid #e2e8f0",marginBottom:12,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
+      <div onClick={()=>setOpen(!open)} style={{padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,userSelect:"none",background:open?"#f8fafc":"#fff",borderBottom:open?"1px solid #e2e8f0":"none"}}>
+        <span style={{fontSize:18,transition:"transform 0.2s",display:"inline-block",transform:open?"rotate(90deg)":"rotate(0deg)"}}>▶</span>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+            <h3 style={{margin:0,fontSize:15,fontWeight:700,color:"#1e293b"}}>{topic.title}</h3>
+            <span style={{fontSize:11,color:"#64748b"}}>🟢{topic.questions.filter(q=>q.level==="green").length} 🟡{topic.questions.filter(q=>q.level==="amber").length} 🔴{topic.questions.filter(q=>q.level==="red").length}</span>
+          </div>
+          <div style={{marginTop:6,display:"flex",alignItems:"center",gap:10}}>
+            <div style={{flex:1,height:6,background:"#e2e8f0",borderRadius:3,overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${attempted>0?pct:0}%`,background:pct>=80?GREEN:pct>=50?AMBER:"#94a3b8",borderRadius:3,transition:"width 0.3s"}}/>
+            </div>
+            <span style={{fontSize:12,color:"#64748b",whiteSpace:"nowrap"}}>{attempted>0?`${correct}/${total} correct`:"Not started"}</span>
+          </div>
+        </div>
+        {attempted===total&&<span style={{fontSize:20}}>{pct>=80?"🌟":pct>=50?"👍":"📝"}</span>}
+      </div>
+      {open&&(
+        <div style={{padding:"14px 18px"}}>
+          {topic.questions.map((q,i)=>(
+            <QuestionCard key={i} question={q} qIndex={i} topicId={topic.id} answer={answers[`${topic.id}-${i}`]} onAnswer={onAnswer}/>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function App(){
+  const [answers,setAnswers]=useState(()=>loadLS(STORAGE_KEY_ANSWERS,{}));
+  const [studentName,setStudentName]=useState(()=>loadLS(STORAGE_KEY_NAME,""));
+  const [filter,setFilter]=useState("all");
+  const [sent,setSent]=useState(false);
+  const [saveFlash,setSaveFlash]=useState(false);
+
+  useEffect(()=>{saveLS(STORAGE_KEY_ANSWERS,answers);setSaveFlash(true);const t=setTimeout(()=>setSaveFlash(false),2000);return()=>clearTimeout(t);},[answers]);
+  useEffect(()=>{saveLS(STORAGE_KEY_NAME,studentName);},[studentName]);
+
+  const onAnswer=(topicId,qIndex,choice)=>{setAnswers(prev=>({...prev,[`${topicId}-${qIndex}`]:choice}));setSent(false);};
+
+  const totalQ=topics.reduce((s,t)=>s+t.questions.length,0);
+  const attemptedQ=Object.keys(answers).length;
+  const correctQ=topics.reduce((s,t)=>s+t.questions.filter((q,i)=>answers[`${t.id}-${i}`]===q.correct).length,0);
+  const pct=Math.round((attemptedQ/totalQ)*100);
+
+  const statsByLevel=level=>{
+    const qs=topics.flatMap(t=>t.questions.map((q,i)=>({q,t,i})).filter(x=>x.q.level===level));
+    return{total:qs.length,correct:qs.filter(({q,t,i})=>answers[`${t.id}-${i}`]===q.correct).length,attempted:qs.filter(({t,i})=>answers[`${t.id}-${i}`]!==undefined).length};
+  };
+  const gS=statsByLevel("green"),aS=statsByLevel("amber"),rS=statsByLevel("red");
+
+  const buildEmail=()=>{
+    const name=studentName.trim()||"Unknown Student";
+    const date=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+    const lv=q=>q.level==="green"?"🟢":q.level==="amber"?"🟡":"🔴";
+    let b=`GCSE Maths Foundation Diagnostic Results\nStudent: ${name}\nDate: ${date}\n${"=".repeat(50)}\n\n`;
+    b+=`OVERALL SUMMARY\nAnswered: ${attemptedQ} / ${totalQ}\nCorrect: ${correctQ} / ${attemptedQ} (${attemptedQ>0?Math.round(correctQ/attemptedQ*100):0}%)\n\n`;
+    b+=`🟢 Green: ${gS.correct}/${gS.total} correct\n🟡 Amber: ${aS.correct}/${aS.total} correct\n🔴 Red: ${rS.correct}/${rS.total} correct\n\n`;
+    b+=`${"=".repeat(50)}\n\nTOPIC BREAKDOWN\n\n`;
+    topics.forEach(t=>{
+      const tc=t.questions.filter((q,i)=>answers[`${t.id}-${i}`]===q.correct).length;
+      const ta=t.questions.filter((_,i)=>answers[`${t.id}-${i}`]!==undefined).length;
+      const wrong=t.questions.map((q,i)=>({q,i})).filter(({q,i})=>answers[`${t.id}-${i}`]!==undefined&&answers[`${t.id}-${i}`]!==q.correct);
+      const skipped=t.questions.map((q,i)=>({q,i})).filter(({i})=>answers[`${t.id}-${i}`]===undefined);
+      b+=`${t.title}\nScore: ${tc}/${t.questions.length} | ${ta} attempted\n`;
+      if(ta===0){b+=`  ⬜ Not yet attempted\n`;}
+      else if(wrong.length===0&&skipped.length===0){b+=`  ✅ All correct!\n`;}
+      else{
+        if(wrong.length>0){b+=`  ❌ Got wrong:\n`;wrong.forEach(({q,i})=>{const th=answers[`${t.id}-${i}`];b+=`    ${lv(q)} Q${i+1}: ${q.text}\n       Their answer: ${LABELS[th]}. ${q.options[th]}\n       Correct: ${LABELS[q.correct]}. ${q.options[q.correct]}\n`;});}
+        if(skipped.length>0){b+=`  ⬜ Not attempted:\n`;skipped.forEach(({q,i})=>{b+=`    ${lv(q)} Q${i+1}: ${q.text}\n`;});}
+      }
+      b+=`\n`;
+    });
+    b+=`${"=".repeat(50)}\nSent from GCSE Maths Foundation Diagnostic Tool\n`;
+    return`mailto:${TEACHER_EMAIL}?subject=${encodeURIComponent(`Maths Diagnostic — ${name} — ${date}`)}&body=${encodeURIComponent(b)}`;
+  };
+
+  const handleSend=()=>{if(!studentName.trim()){alert("Please type your name first!");return;}window.location.href=buildEmail();setSent(true);};
+  const filteredTopics=filter==="incomplete"?topics.filter(t=>t.questions.some((_,i)=>answers[`${t.id}-${i}`]===undefined)):topics;
+
+  return(
+    <div style={{fontFamily:"system-ui,sans-serif",background:"#f1f5f9",minHeight:"100vh",padding:"20px 16px"}}>
+      <div style={{maxWidth:760,margin:"0 auto"}}>
+
+        <div style={{background:"linear-gradient(135deg,#1e3a5f,#1e40af)",borderRadius:16,padding:"24px 28px",marginBottom:20,color:"#fff",boxShadow:"0 4px 20px rgba(30,58,138,0.3)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:8,marginBottom:4}}>
+            <h1 style={{margin:0,fontSize:22,fontWeight:800}}>GCSE Maths Foundation — Diagnostic Quiz</h1>
+            {saveFlash&&<span style={{fontSize:12,background:"rgba(74,222,128,0.25)",color:"#4ade80",padding:"4px 10px",borderRadius:20,fontWeight:700}}>✓ Saved</span>}
+          </div>
+          <p style={{margin:"0 0 16px",fontSize:13,opacity:0.8}}>OCR J560 · 26 Topics · {totalQ} Questions · Progress saved automatically</p>
+          <div style={{marginBottom:16}}>
+            <label style={{display:"block",fontSize:13,fontWeight:700,marginBottom:6,opacity:0.9}}>✏️ Your name</label>
+            <input type="text" value={studentName} onChange={e=>{setStudentName(e.target.value);setSent(false);}} placeholder="Type your full name here..."
+              style={{width:"100%",padding:"10px 14px",borderRadius:8,border:studentName.trim()?"2px solid #4ade80":"2px solid rgba(255,255,255,0.3)",background:"rgba(255,255,255,0.15)",fontSize:15,outline:"none",boxSizing:"border-box",fontWeight:600}}/>
+          </div>
+          <div style={{background:"rgba(255,255,255,0.15)",borderRadius:10,padding:"14px 16px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+              <span style={{fontSize:13,fontWeight:700}}>Progress</span>
+              <span style={{fontSize:13,fontWeight:700}}>{attemptedQ}/{totalQ} answered · {correctQ} correct</span>
+            </div>
+            <div style={{height:8,background:"rgba(255,255,255,0.3)",borderRadius:4,overflow:"hidden",marginBottom:12}}>
+              <div style={{height:"100%",width:`${pct}%`,background:"#4ade80",borderRadius:4,transition:"width 0.3s"}}/>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+              {[{label:"🟢 Easy",s:gS},{label:"🟡 Medium",s:aS},{label:"🔴 Hard",s:rS}].map(({label,s})=>(
+                <div key={label} style={{background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"8px 10px"}}>
+                  <div style={{fontSize:11,opacity:0.85,marginBottom:2}}>{label}</div>
+                  <div style={{fontSize:15,fontWeight:800}}>{s.correct}<span style={{fontSize:11,fontWeight:400,opacity:0.7}}>/{s.total} ✓</span></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div style={{marginBottom:16}}>
+          <button onClick={handleSend} style={{width:"100%",padding:16,borderRadius:12,border:"none",background:sent?"#16a34a":"linear-gradient(135deg,#0ea5e9,#2563eb)",color:"#fff",fontSize:17,fontWeight:800,cursor:"pointer",boxShadow:"0 4px 14px rgba(37,99,235,0.35)",display:"flex",alignItems:"center",justifyContent:"center",gap:10,fontFamily:"inherit"}}>
+            <span style={{fontSize:22}}>{sent?"✅":"📧"}</span>
+            {sent?"Results sent! Well done.":"Send my results to my teacher"}
+          </button>
+          <p style={{textAlign:"center",fontSize:12,color:"#94a3b8",margin:"6px 0 0"}}>Tap this to open your email app — it will already be filled in. Just tap Send.</p>
+        </div>
+
+        <div style={{display:"flex",gap:10,marginBottom:16,flexWrap:"wrap"}}>
+          {["green","amber","red"].map(l=>(
+            <div key={l} style={{background:levelConfig[l].bg,border:`1px solid ${levelConfig[l].border}`,borderRadius:8,padding:"6px 12px",fontSize:12,color:levelConfig[l].color,fontWeight:600,flex:1,minWidth:140}}>
+              {levelConfig[l].emoji} {l==="green"?"Green = Easy basics":l==="amber"?"Amber = Medium":"Red = Harder"}
+            </div>
+          ))}
+        </div>
+
+        <div style={{display:"flex",gap:8,marginBottom:16}}>
+          {[{val:"all",label:"All Topics"},{val:"incomplete",label:"Not Finished Yet"}].map(f=>(
+            <button key={f.val} onClick={()=>setFilter(f.val)} style={{padding:"6px 16px",borderRadius:8,border:"1px solid #cbd5e1",background:filter===f.val?"#1e3a5f":"#fff",color:filter===f.val?"#fff":"#475569",fontSize:13,cursor:"pointer",fontWeight:600,fontFamily:"inherit"}}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {filteredTopics.map(topic=>(
+          <TopicSection key={topic.id} topic={topic} answers={answers} onAnswer={onAnswer}/>
+        ))}
+
+        <div style={{textAlign:"center",padding:20,color:"#94a3b8",fontSize:12}}>
+          OCR GCSE Mathematics Foundation Tier J560 · Answers saved automatically · Come back any time
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
